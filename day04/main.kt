@@ -15,6 +15,12 @@ fun main() {
             }
         }
 
+        /** Attempts to stamp the spot with number n (if it's on the board).
+         * If stamping results in a win, the score of the board of is returned.
+         * Otherwise -1 is returned.
+         * 
+         * The score is n * the sum of unstamped numbers.
+         */
         fun stamp(n: Int) : Int  {
             val p = positionMap.get(n)
             if (p == null) {
@@ -24,13 +30,10 @@ fun main() {
             rowStamps[p.row]--
             colStamps[p.col]--
             if (rowStamps[p.row] == 0 || colStamps[p.col] == 0) {
-                return sumUnstamped() // Row Bingo!
+                // Bingo!
+                return n * positionMap.filterValues { !it.stamped }.keys.sum()
             }
-            return -1; // No Bingo.
-        }
-
-        private fun sumUnstamped(): Int {
-            return positionMap.filterValues { !it.stamped }.keys.sum()
+            return -1 // No Bingo.
         }
  
         override fun toString(): String {
@@ -61,35 +64,29 @@ fun main() {
         }
 
         // Build up a Bingo grid.
-        var grid = Array<IntArray>(5, { _ -> IntArray(0) })
+        var grid = Array<IntArray>(5, { _ -> IntArray(5) })
         var gridIndex = 0
         while(input.hasNextLine()) {
             val scanned = input.nextLine()
-            println("got scanned line: `$scanned`")
             if (scanned.isBlank()) {
                 break;
             }
 
             val split = scanned.trim().split(whitespace)
-            // println("split is `$split` with len %d".format(split.size))
             grid[gridIndex++] = split.map { s -> Integer.parseInt(s) }.toIntArray()
         }
 
-        // println("playing bingo with board:\n$grid")
-
         // Play Bingo!
         var board = BingoBoard(grid)
-        println(board.toString())
         for ((i, n) in chosenNumbers.withIndex()) {
-            val sum = board.stamp(n)
-            // println("board attempted to stamp $n with return value $sum")
-            if (sum < 0) {
+            val score = board.stamp(n)
+            if (score < 0) {
                 continue;
             }
 
             if (minSteps > i) {
                 minSteps = i
-                scoreForMinSteps = sum * n
+                scoreForMinSteps = score
                 break;
             }
         }
