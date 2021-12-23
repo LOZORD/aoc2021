@@ -1,6 +1,8 @@
 import java.util.Scanner
 
 fun main() {
+    val isPart1 = false // true => Part 1; false => Part 2
+
     data class Position(val row: Int, val col: Int, var stamped: Boolean)
     class BingoBoard {
         val positionMap = HashMap<Int, Position>(25)
@@ -55,8 +57,10 @@ fun main() {
     val input = Scanner(System.`in`)
     val chosenNumbers = ArrayList<Int>()
     val whitespace = Regex("\\s+")
-    var minSteps = Int.MAX_VALUE
-    var scoreForMinSteps = 0
+
+    var optimalSteps = if (isPart1) Int.MAX_VALUE else Int.MIN_VALUE
+    var optimalScore = -1
+
     while(input.hasNextLine()) {
         if (chosenNumbers.isEmpty()) {
             chosenNumbers.addAll(input.nextLine().split(',').map { s -> Integer.parseInt(s) })
@@ -81,16 +85,23 @@ fun main() {
         for ((i, n) in chosenNumbers.withIndex()) {
             val score = board.stamp(n)
             if (score < 0) {
-                continue;
+                // No Bingo :(
+                continue
             }
 
-            if (minSteps > i) {
-                minSteps = i
-                scoreForMinSteps = score
-                break;
+            // Bingo!
+            val shouldUpdate = (isPart1 && optimalSteps > i)
+                || (!isPart1 && optimalSteps < i)
+
+            if (shouldUpdate) {
+                optimalSteps = i
+                optimalScore = score
             }
+            
+            // On to the next board.
+            break
         }
     }
 
-    println("SCORE: $scoreForMinSteps")
+    println("SCORE: $optimalScore")
 }
